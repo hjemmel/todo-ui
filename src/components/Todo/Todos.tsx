@@ -53,7 +53,7 @@ const Todos = () => {
         <Section>
             <ToogleTodos type="checkbox"/>
             <List>
-                {context.state.todos.map((item, index)=> {
+                {context.state.filteredTodos.map((item, index)=> {
                     return <TodoItem key={index} todo={item} />
                 })}
             </List>

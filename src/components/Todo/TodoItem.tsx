@@ -1,4 +1,4 @@
-import React from "react"
+import React, {FocusEventHandler, SyntheticEvent} from "react"
 import styled, {css} from "styled-components";
 import {ITodo, KEY_ENTER, KEY_ESCAPE} from "./interfaces";
 import {TodoInput} from "./TodoInput";
@@ -9,7 +9,6 @@ interface DoneLabel {
 }
 
 
-
 const Label = styled.label<DoneLabel>`
     word-break: break-all;
 	padding: 15px 15px 15px 60px;
@@ -17,13 +16,13 @@ const Label = styled.label<DoneLabel>`
 	line-height: 1.2;
 	transition: color 0.4s;
 	
-	${({ done }) =>
-        done && `& {
+	${({done}) =>
+    done && `& {
             color: #d9d9d9;
             text-decoration: line-through;
         }
      `
-    };
+};
 
 `;
 
@@ -53,7 +52,12 @@ export const
     }
 `;
 
-const Item = styled.li`
+
+interface Editing {
+    editing: boolean
+}
+
+const Item = styled.li<Editing>`
     position: relative;
     font-size: 24px;
     border-bottom: 1px solid #ededed;
@@ -61,6 +65,17 @@ const Item = styled.li`
     &:last-child {
       border-bottom: none;
     }
+    
+    ${(props) => {
+    return props.editing && css`
+        border-bottom: none;
+        padding: 0;
+
+        &:last-child {
+          margin-bottom: -1px;
+        }
+      `
+}}
 
 `;
 
@@ -92,6 +107,13 @@ var RemoveButton = styled.button`
     }
  `;
 
+const EditTodo = styled(TodoInput)`
+    display: block;
+    width: 506px;
+    padding: 12px 16px;
+    margin: 0 0 0 43px;
+`;
+
 interface Props {
     todo: ITodo;
 }
@@ -104,10 +126,30 @@ const TodoItem = (props: Props) => {
         setEditing(true);
     };
 
+    const updateName = (text: string) => {
+        context.actions.updateTodo({...props.todo, name: text});
+    };
+
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === KEY_ESCAPE) {
             setEditing(false);
         } else if (event.key === KEY_ENTER) {
+            setEditing(false);
+        }
+    };
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const name = event.currentTarget.value.trim();
+        if (editing && name) {
+            updateName(name);
+        }
+    };
+
+    const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+        const name = event.currentTarget.value.trim();
+        if (name && name !== props.todo.name) {
+            updateName(name);
+        } else {
             setEditing(false);
         }
     };
@@ -120,21 +162,29 @@ const TodoItem = (props: Props) => {
         context.actions.updateTodo({...props.todo, done: !props.todo.done});
     };
 
+    const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
+        event.currentTarget.select();
+    };
+
     return (
-        <Item>
+        <Item editing={editing}>
             <div>
                 {editing ?
-                    (<TodoInput
+                    (<EditTodo
                         autoFocus
+                        onFocus={handleFocus}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        value={props.todo.name}
                         onKeyDown={handleKeyDown}
                     />) :
                     (
                         <>
                             <InputCheckbox type="checkbox"
-                                   onChange={handleDone}
-                                   checked={props.todo.done}/>
+                                           onChange={handleDone}
+                                           checked={props.todo.done}/>
                             <Label done={props.todo.done} onDoubleClick={handleDoubleClick}>{props.todo.name}</Label>
-                            <RemoveButton onClick={handleClick} />
+                            <RemoveButton onClick={handleClick}/>
                         </>
                     )}
 

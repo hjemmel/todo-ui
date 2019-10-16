@@ -1,6 +1,8 @@
 import React from "react"
 import styled, {css} from "styled-components";
 import {GlobalContext} from "../Global/GlobalState";
+import {TodoState} from "../Global/interfaces";
+import FilterItem from "./FilterItem";
 
 const Footer = styled.footer`
     color: #777;
@@ -47,68 +49,43 @@ const Filters = styled.ul`
     }
 `;
 
-const FilterItem = styled.li`
-    display: inline;
-`;
-
-interface Selectable {
-    selected: boolean;
-}
-
-const FilterItemLink = styled.a<Selectable>`
-    color: inherit;
-    margin: 3px;
-    padding: 3px 7px;
-    text-decoration: none;
-    border: 1px solid transparent;
-    border-radius: 3px;
-
-    &:hover {
-      border-color: rgba(175, 47, 47, 0.1);
-    }
-
-    ${(props) => {
-    return props.selected && css`
-        border-color: rgba(175, 47, 47, 0.2);
-      `
-}}
-  `;
-
 const FooterFilters = () => {
     const context = React.useContext(GlobalContext);
 
-    const plural = (count:number, word: string):string => {
+    const plural = (count: number, word: string): string => {
         return (count > 1) ? `${word}s` : word;
+    };
+
+    const handleSelect = (todoState: TodoState) => {
+        context.actions.filterTodos(todoState);
     };
 
     return (
         <Footer>
             <TodoCount>
-                <TodoCountNumber>{context.state.todos.length}</TodoCountNumber> {plural(context.state.todos.length, "todo")} left
+                <TodoCountNumber>{context.state.filteredTodos.length}</TodoCountNumber> {plural(context.state.todos.length, "todo")} left
             </TodoCount>
             <Filters>
-                <FilterItem>
-                    <FilterItemLink
-                        href="#/"
-                        selected={true}>
-                        All
-                    </FilterItemLink>
+                <FilterItem
+                    todoState="ALL"
+                    selected={context.state.todoState === "ALL"}
+                    handleSelect={handleSelect}
+                >
+                    All
                 </FilterItem>
-                {' '}
-                <FilterItem>
-                    <FilterItemLink
-                        href="#/active"
-                        selected={false}>
-                        Active
-                    </FilterItemLink>
+                <FilterItem
+                    todoState="ACTIVE"
+                    selected={context.state.todoState === "ACTIVE"}
+                    handleSelect={handleSelect}
+                >
+                    Active
                 </FilterItem>
-                {' '}
-                <FilterItem>
-                    <FilterItemLink
-                        href="#/completed"
-                        selected={false}>
-                        Completed
-                    </FilterItemLink>
+                <FilterItem
+                    todoState="COMPLETED"
+                    selected={context.state.todoState === "COMPLETED"}
+                    handleSelect={handleSelect}
+                >
+                    Completed
                 </FilterItem>
             </Filters>
         </Footer>
