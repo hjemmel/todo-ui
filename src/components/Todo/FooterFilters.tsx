@@ -1,5 +1,5 @@
 import React from "react"
-import styled, {css} from "styled-components";
+import styled from "styled-components";
 import {GlobalContext} from "../Global/GlobalState";
 import {TodoState} from "../Global/interfaces";
 import FilterItem from "./FilterItem";
@@ -60,36 +60,38 @@ const FooterFilters = () => {
         context.actions.filterTodos(todoState);
     };
 
-    return (
-        <Footer>
-            <TodoCount>
-                <TodoCountNumber>{context.state.filteredTodos.length}</TodoCountNumber> {plural(context.state.todos.length, "todo")} left
-            </TodoCount>
-            <Filters>
-                <FilterItem
-                    todoState="ALL"
-                    selected={context.state.todoState === "ALL"}
-                    handleSelect={handleSelect}
-                >
-                    All
-                </FilterItem>
-                <FilterItem
-                    todoState="ACTIVE"
-                    selected={context.state.todoState === "ACTIVE"}
-                    handleSelect={handleSelect}
-                >
-                    Active
-                </FilterItem>
-                <FilterItem
-                    todoState="COMPLETED"
-                    selected={context.state.todoState === "COMPLETED"}
-                    handleSelect={handleSelect}
-                >
-                    Completed
-                </FilterItem>
-            </Filters>
-        </Footer>
-    );
+    if(context.state.todos.length > 0) {
+        return (
+            <Footer>
+                <TodoCount>
+                    <TodoCountNumber>{context.state.filteredTodos.length}</TodoCountNumber> {plural(context.state.todos.length, "todo")}
+                </TodoCount>
+                <Filters>
+                    <FilterItem
+                        todoState="ALL"
+                        selected={context.state.todoState === "ALL"}
+                        handleSelect={handleSelect}
+                    >
+                        All
+                    </FilterItem>
+                    <FilterItem
+                        todoState="ACTIVE"
+                        selected={context.state.todoState === "ACTIVE"}
+                        handleSelect={handleSelect}
+                    >
+                        Active
+                    </FilterItem>
+                    <FilterItem
+                        todoState="COMPLETED"
+                        selected={context.state.todoState === "COMPLETED"}
+                        handleSelect={handleSelect}
+                    >
+                        Completed
+                    </FilterItem>
+                </Filters>
+            </Footer>
+        );
+    } else {return null}
 };
 
 export default FooterFilters;

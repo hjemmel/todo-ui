@@ -1,8 +1,9 @@
 import React from "react";
 import styled from "styled-components";
 import {TodoInput} from "./TodoInput";
-import GlobalState, {GlobalContext} from "../Global/GlobalState";
+import {GlobalContext} from "../Global/GlobalState";
 import {KEY_ENTER} from "./interfaces";
+import API from "../Util/API";
 
 const H1 = styled.h1`
     position: absolute;
@@ -40,22 +41,29 @@ const AddTodo = () => {
         event.preventDefault();
 
         if(todo) {
-            context.actions.addTodo(todo);
-            setTodo(''); //clearing after
+            context.actions.isLoading(true);
+            API.post("todos", {name: todo, done: false}).then((response) => {
+                context.actions.addTodo(response.data.name);
+                setTodo(''); //clearing after
+                context.actions.isLoading(false);
+            });
         }
     };
 
     return (
         <header>
             <H1>todos</H1>
-            <NewTodo
-                value={todo}
-                autoFocus
-                className="new-todo"
-                placeholder="What needs to be done?"
-                onKeyDown={handleKeyDown}
-                onChange={handleChange}
-            />
+            <div>
+                <NewTodo
+                    value={todo}
+                    autoFocus
+                    className="new-todo"
+                    placeholder="What needs to be done?"
+                    onKeyDown={handleKeyDown}
+                    onChange={handleChange}
+                />
+            </div>
+
         </header>
     );
 };

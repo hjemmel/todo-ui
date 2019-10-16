@@ -2,11 +2,11 @@ import React from "react"
 import styled from "styled-components";
 import TodoItem from "./TodoItem";
 import {GlobalContext} from "../Global/GlobalState";
+import API from "../Util/API";
 
 
 const Section = styled.section`
     position: relative;
-    z-index: 2;
     border-top: 1px solid #e6e6e6;
 `;
 
@@ -48,6 +48,13 @@ const List = styled.ul`
 
 const Todos = () => {
     const context = React.useContext(GlobalContext);
+
+    React.useEffect(() =>{
+        context.actions.isLoading(true);
+        API.get("todos").then((response) => {
+            context.actions.addAll(response.data)
+        });
+    }, []);
 
     return (
         <Section>

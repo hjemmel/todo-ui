@@ -1,13 +1,13 @@
-import React, {FocusEventHandler, SyntheticEvent} from "react"
+import React, {useEffect} from "react"
 import styled, {css} from "styled-components";
 import {ITodo, KEY_ENTER, KEY_ESCAPE} from "./interfaces";
 import {TodoInput} from "./TodoInput";
 import {GlobalContext} from "../Global/GlobalState";
+import API from "../Util/API";
 
 interface DoneLabel {
     done: boolean;
 }
-
 
 const Label = styled.label<DoneLabel>`
     word-break: break-all;
@@ -121,50 +121,67 @@ interface Props {
 const TodoItem = (props: Props) => {
     const [editing, setEditing] = React.useState(false);
     const context = React.useContext(GlobalContext);
+    const [text, setText] = React.useState('');
 
     const handleDoubleClick = () => {
         setEditing(true);
     };
 
     const updateName = (text: string) => {
-        context.actions.updateTodo({...props.todo, name: text});
+        updateTodo({...props.todo, name: text.trim()});
     };
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === KEY_ESCAPE) {
             setEditing(false);
         } else if (event.key === KEY_ENTER) {
+            updateName(text);
             setEditing(false);
         }
     };
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const name = event.currentTarget.value.trim();
-        if (editing && name) {
-            updateName(name);
+        const name = event.currentTarget.value;
+        if (editing) {
+            setText(name);
         }
     };
 
     const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
         const name = event.currentTarget.value.trim();
         if (name && name !== props.todo.name) {
-            updateName(name);
+            setText(name);
         } else {
             setEditing(false);
         }
     };
 
     const handleClick = () => {
-        context.actions.removeTodo(props.todo.id);
+        context.actions.isLoading(true);
+        API.delete(`todos/${props.todo.id}`).then((response) => {
+            context.actions.addAll(response.data);
+        });
     };
 
     const handleDone = () => {
-        context.actions.updateTodo({...props.todo, done: !props.todo.done});
+        updateTodo({...props.todo, done: !props.todo.done});
+    };
+
+    const updateTodo = (todo: ITodo) => {
+        context.actions.isLoading(true);
+        API.put(`todos/${todo.id}`, todo).then((response) => {
+            context.actions.updateTodo(response.data);
+        });
+
     };
 
     const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
         event.currentTarget.select();
     };
+
+    useEffect(()=>{
+        setText(props.todo.name);
+    }, [props.todo.name] );
 
     return (
         <Item editing={editing}>
@@ -175,7 +192,7 @@ const TodoItem = (props: Props) => {
                         onFocus={handleFocus}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        value={props.todo.name}
+                        value={text}
                         onKeyDown={handleKeyDown}
                     />) :
                     (

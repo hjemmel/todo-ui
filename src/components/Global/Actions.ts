@@ -23,18 +23,26 @@ function filterList(todoState: TodoState, todos: ITodo[]) {
 
 export const actions: ActionMap<MainState, Actions> = {
 
+    addAll: (todos: ITodo[]) => (state: MainState) => {
+
+        return {...state, todos, filteredTodos: filterList(state.todoState, todos), loading: false};
+    },
+
     addTodo: (text: string) => (state: MainState) => {
 
         const todo = {id: uuidv4(), name: text, done: false};
         const todos = [...state.todos, todo];
 
-        return {...state, todos, filteredTodos: filterList(state.todoState, todos)};
+        return {
+            ...state,
+            todos,
+            filteredTodos: filterList(state.todoState, todos),
+            loading: false,
+        };
     },
 
-    removeTodo: (id: string) => (state: MainState) => {
-        const todos = state.todos.filter(item => id !== item.id);
-
-        return {...state, todos, filteredTodos: filterList(state.todoState, todos)};
+    isLoading: (loading: boolean) => (state: MainState) => {
+        return {...state, loading};
     },
 
     updateTodo: (todo: ITodo) => (state: MainState) => {
@@ -47,7 +55,7 @@ export const actions: ActionMap<MainState, Actions> = {
             ...todo
         };
 
-        return {...state, todos, filteredTodos: filterList(state.todoState, todos)};
+        return {...state, todos, filteredTodos: filterList(state.todoState, todos), loading: false};
     },
 
     filterTodos: (todoState: TodoState) => (state: MainState) => {
@@ -60,5 +68,5 @@ export const actions: ActionMap<MainState, Actions> = {
             default:
                 return {...state, todoState: todoState, filteredTodos: filterList(todoState, state.todos)};
         }
-    },
+    }
 };
