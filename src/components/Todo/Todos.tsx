@@ -1,6 +1,7 @@
 import React from "react"
 import styled from "styled-components";
 import TodoItem from "./TodoItem";
+import {GlobalContext} from "../Global/GlobalState";
 
 
 const Section = styled.section`
@@ -46,12 +47,15 @@ const List = styled.ul`
 `;
 
 const Todos = () => {
+    const context = React.useContext(GlobalContext);
+
     return (
         <Section>
             <ToogleTodos type="checkbox"/>
             <List>
-                <TodoItem name="First Todo" done={true}/>
-                <TodoItem name="Second Todo" done={false}/>
+                {context.state.todos.map((item, index)=> {
+                    return <TodoItem key={index} todo={item} />
+                })}
             </List>
         </Section>
     );

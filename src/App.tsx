@@ -6,6 +6,7 @@ import AddTodo from "./components/Todo/AddTodo";
 import FooterFilters from "./components/Todo/FooterFilters";
 import Todos from "./components/Todo/Todos";
 import {GlobalStyles} from "./components/Global/GlobalStyles";
+import GlobalState from "./components/Global/GlobalState";
 
 const TodoApp = styled.section`
   background: #fff;
@@ -21,9 +22,11 @@ const App = () => {
             <GlobalStyles/>
             <Normalize/>
             <TodoApp>
-                <AddTodo/>
-                <Todos/>
-                <FooterFilters/>
+                <GlobalState>
+                    <AddTodo/>
+                    <Todos/>
+                    <FooterFilters/>
+                </GlobalState>
             </TodoApp>
         </>
     );

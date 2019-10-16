@@ -1,6 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 import {TodoInput} from "./TodoInput";
+import GlobalState, {GlobalContext} from "../Global/GlobalState";
+import {KEY_ENTER} from "./interfaces";
 
 const H1 = styled.h1`
     position: absolute;
@@ -10,8 +12,6 @@ const H1 = styled.h1`
     font-weight: 100;
     text-align: center;
     color: rgba(175, 47, 47, 0.15);
-    -webkit-text-rendering: optimizeLegibility;
-    -moz-text-rendering: optimizeLegibility;
     text-rendering: optimizeLegibility;
 `;
 
@@ -24,13 +24,37 @@ const NewTodo = styled(TodoInput)`
 `;
 
 const AddTodo = () => {
+
+    const [todo, setTodo] = React.useState<string>("");
+    const context = React.useContext(GlobalContext);
+
+    const handleChange =  (event: React.ChangeEvent<HTMLInputElement>) => {
+        setTodo(event.currentTarget.value);
+    };
+
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+
+        if (event.key !== KEY_ENTER)
+            return;
+
+        event.preventDefault();
+
+        if(todo) {
+            context.actions.addTodo(todo);
+            setTodo(''); //clearing after
+        }
+    };
+
     return (
-        <header className="header">
+        <header>
             <H1>todos</H1>
             <NewTodo
+                value={todo}
                 autoFocus
                 className="new-todo"
                 placeholder="What needs to be done?"
+                onKeyDown={handleKeyDown}
+                onChange={handleChange}
             />
         </header>
     );

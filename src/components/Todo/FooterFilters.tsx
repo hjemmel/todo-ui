@@ -1,6 +1,6 @@
 import React from "react"
 import styled, {css} from "styled-components";
-import {ITodo} from "./interfaces";
+import {GlobalContext} from "../Global/GlobalState";
 
 const Footer = styled.footer`
     color: #777;
@@ -25,40 +25,14 @@ const Footer = styled.footer`
     }
 `;
 
-const Ul = styled.ul`
-    color: #777;
-    padding: 10px 15px;
-    height: 20px;
-    text-align: center;
-    border-top: 1px solid #e6e6e6;
-`;
-
-const Filter = styled.li`
-    display: inline;
-`;
-
-const A = styled.a`
-    color: inherit;
-    margin: 3px;
-    padding: 3px 7px;
-    text-decoration: none;
-    border: 1px solid transparent;
-    border-radius: 3px;
-    cursor: pointer;
-    user-select: none;
-    :hover {
-      border-color: rgba(175, 47, 47, 0.1);  
-    }
-`;
-
 const TodoCount = styled.span`
     float: left;
     text-align: left;
-  `
+`;
 
 const TodoCountNumber = styled.strong`
     font-weight: 300;
-  `
+`;
 
 const Filters = styled.ul`
     margin: 0;
@@ -71,11 +45,11 @@ const Filters = styled.ul`
     @media (max-width: 430px) {
       bottom: 10px;
     }
-  `
+`;
 
 const FilterItem = styled.li`
     display: inline;
-  `
+`;
 
 interface Selectable {
     selected: boolean;
@@ -101,10 +75,16 @@ const FilterItemLink = styled.a<Selectable>`
   `;
 
 const FooterFilters = () => {
+    const context = React.useContext(GlobalContext);
+
+    const plural = (count:number, word: string):string => {
+        return (count > 1) ? `${word}s` : word;
+    };
+
     return (
         <Footer>
             <TodoCount>
-                <TodoCountNumber>4</TodoCountNumber> todos left
+                <TodoCountNumber>{context.state.todos.length}</TodoCountNumber> {plural(context.state.todos.length, "todo")} left
             </TodoCount>
             <Filters>
                 <FilterItem>
