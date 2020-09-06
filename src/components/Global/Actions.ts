@@ -1,72 +1,81 @@
-import {Actions, MainState, TodoState} from "./interfaces";
-import {ActionMap} from "./GlobalState";
-import {ITodo} from "../Todo/interfaces";
-
-function uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-}
+import { Actions, MainState, TodoState } from "./interfaces";
+import { ActionMap } from "./GlobalState";
+import { ITodo } from "../Todo/interfaces";
 
 function filterList(todoState: TodoState, todos: ITodo[]) {
-
-    switch (todoState) {
-        case "COMPLETED":
-            return [...todos.filter(item => item.done)];
-        case "ACTIVE":
-            return [...todos.filter(item => !item.done)];
-        default:
-            return [...todos];
-    }
+  switch (todoState) {
+    case "COMPLETED":
+      return [...todos.filter((item) => item.done)];
+    case "ACTIVE":
+      return [...todos.filter((item) => !item.done)];
+    default:
+      return [...todos];
+  }
 }
 
 export const actions: ActionMap<MainState, Actions> = {
+  addAll: (todos: ITodo[]) => (state: MainState) => {
+    return {
+      ...state,
+      todos,
+      filteredTodos: filterList(state.todoState, todos),
+      loading: false,
+    };
+  },
 
-    addAll: (todos: ITodo[]) => (state: MainState) => {
+  addTodo: (todo: ITodo) => (state: MainState) => {
+    const todos = [...state.todos, todo];
 
-        return {...state, todos, filteredTodos: filterList(state.todoState, todos), loading: false};
-    },
+    return {
+      ...state,
+      todos,
+      filteredTodos: filterList(state.todoState, todos),
+      loading: false,
+    };
+  },
 
-    addTodo: (text: string) => (state: MainState) => {
+  isLoading: (loading: boolean) => (state: MainState) => {
+    return { ...state, loading };
+  },
 
-        const todo = {id: uuidv4(), name: text, done: false};
-        const todos = [...state.todos, todo];
+  updateTodo: (todo: ITodo) => (state: MainState) => {
+    const index = state.todos.findIndex((item) => todo.id === item.id);
 
+    const todos = [...state.todos];
+
+    todos[index] = {
+      ...todos[index],
+      ...todo,
+    };
+
+    return {
+      ...state,
+      todos,
+      filteredTodos: filterList(state.todoState, todos),
+      loading: false,
+    };
+  },
+
+  filterTodos: (todoState: TodoState) => (state: MainState) => {
+    switch (todoState) {
+      case "COMPLETED":
         return {
-            ...state,
-            todos,
-            filteredTodos: filterList(state.todoState, todos),
-            loading: false,
+          ...state,
+          todoState: todoState,
+          filteredTodos: filterList(todoState, state.todos),
         };
-    },
-
-    isLoading: (loading: boolean) => (state: MainState) => {
-        return {...state, loading};
-    },
-
-    updateTodo: (todo: ITodo) => (state: MainState) => {
-        const index = state.todos.findIndex(item => todo.id === item.id);
-
-        const todos = [...state.todos];
-
-        todos[index] = {
-            ...todos[index],
-            ...todo
+      case "ACTIVE":
+        return {
+          ...state,
+          todoState: todoState,
+          filteredTodos: filterList(todoState, state.todos),
         };
-
-        return {...state, todos, filteredTodos: filterList(state.todoState, todos), loading: false};
-    },
-
-    filterTodos: (todoState: TodoState) => (state: MainState) => {
-
-        switch (todoState) {
-            case "COMPLETED":
-                return {...state, todoState: todoState, filteredTodos: filterList(todoState, state.todos)};
-            case "ACTIVE":
-                return {...state, todoState: todoState, filteredTodos: filterList(todoState, state.todos)};
-            default:
-                return {...state, todoState: todoState, filteredTodos: filterList(todoState, state.todos)};
-        }
+      default:
+        return {
+          ...state,
+          todoState: todoState,
+          filteredTodos: filterList(todoState, state.todos),
+        };
     }
+  },
 };
